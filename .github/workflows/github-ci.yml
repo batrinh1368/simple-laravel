@@ -1,0 +1,43 @@
+name: Laravel
+
+on: [push]
+
+jobs:
+  laravel-ci:
+    runs-on: ubuntu-latest
+    container:
+      image: trinhnv/php-laravel:latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: laravel
+        ports:
+          - 3307:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v1
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Install Dependencies
+        run: composer install --no-scripts
+      - name: Preparing
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Create Database
+        run: |
+          php artisan migrate
+          php artisan db:seed
+      #      PHPUnit test
+      #- name: Execute tests (Unit and Feature tests) via PHPUnit
+      #  run: vendor/bin/phpunit tests/
+#      - name: Upgrade chrome driver
+#        run: php artisan dusk:chrome-driver
+#      - name: Start Chrome Driver
+#        run: ./vendor/laravel/dusk/bin/chromedriver-linux > /dev/null 2>&1 &
+#      - name: Run Laravel Server
+#        run: php artisan serve > /dev/null 2>&1 &
+#      - name: Run dusk tests
+#        run: php artisan dusk

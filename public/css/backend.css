@@ -1,0 +1,5 @@
+.user-panel > .image img {
+    width: 100%;
+    max-width: 45px;
+    height: auto;
+}
